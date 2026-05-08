@@ -51,6 +51,7 @@ struct inode*   namei(char*);
 struct inode*   nameiparent(char*, char*);
 int             readi(struct inode*, int, uint64, uint, uint);
 void            stati(struct inode*, struct stat*);
+int             check_perm(struct inode*, int);
 int             writei(struct inode*, int, uint64, uint, uint);
 void            itrunc(struct inode*);
 void            ireclaim(int);

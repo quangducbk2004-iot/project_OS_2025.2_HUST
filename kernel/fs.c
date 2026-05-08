@@ -22,6 +22,32 @@
 #include "file.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
+
+// check_perm: kiem tra quyen truy cap file
+// access: 4=read, 2=write, 1=execute
+// Return: 1 neu duoc phep, 0 neu bi tu choi
+int
+check_perm(struct inode *ip, int access)
+{
+  struct proc *p = myproc();
+  uint mode, bits;
+
+  if(p == 0) return 1;           // kernel call: always allow
+  if(p->uid == 0) return 1;      // root: always allow
+  if(ip == 0) return 0;
+
+  mode = ip->mode;
+
+  if(p->uid == ip->uid) {
+    bits = (mode >> 6) & 0x7;   // owner bits [8:6]
+  } else if(p->gid == ip->gid) {
+    bits = (mode >> 3) & 0x7;   // group bits [5:3]
+  } else {
+    bits = mode & 0x7;           // others bits [2:0]
+  }
+  return (bits & access) ? 1 : 0;
+}
+
 // there should be one superblock per disk device, but we run with
 // only one device
 struct superblock sb; 
@@ -209,6 +235,13 @@ ialloc(uint dev, short type)
     if(dip->type == 0){  // a free inode
       memset(dip, 0, sizeof(*dip));
       dip->type = type;
+      // Set default permissions khi tao file/dir moi
+      if(type == T_DIR)
+        dip->mode = 0755;   // rwxr-xr-x
+      else
+        dip->mode = 0644;   // rw-r--r--
+      dip->uid = myproc() ? myproc()->uid : 0;
+      dip->gid = myproc() ? myproc()->gid : 0;
       log_write(bp);   // mark it allocated on the disk
       brelse(bp);
       return iget(dev, inum);
@@ -237,6 +270,9 @@ iupdate(struct inode *ip)
   dip->nlink = ip->nlink;
   dip->size = ip->size;
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
+  dip->mode = ip->mode;
+  dip->uid  = ip->uid;
+  dip->gid  = ip->gid;
   log_write(bp);
   brelse(bp);
 }
@@ -310,6 +346,9 @@ ilock(struct inode *ip)
     ip->nlink = dip->nlink;
     ip->size = dip->size;
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
+    ip->mode = dip->mode;
+    ip->uid  = dip->uid;
+    ip->gid  = dip->gid;
     brelse(bp);
     ip->valid = 1;
     if(ip->type == 0)
@@ -485,6 +524,8 @@ stati(struct inode *ip, struct stat *st)
   st->type = ip->type;
   st->nlink = ip->nlink;
   st->size = ip->size;
+  st->mode = ip->mode;
+  st->uid  = ip->uid;
 }
 
 // Read data from inode.
