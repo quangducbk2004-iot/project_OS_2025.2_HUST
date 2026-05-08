@@ -336,21 +336,28 @@ sys_open(void)
   }
 
   // === ENFORCE PERMISSION CHECK ===
-  if((omode & O_RDONLY) == O_RDONLY || (omode & O_RDWR)){
-    if(!check_perm(ip, 4)){   // check read permission (4)
+  if(omode & O_RDWR){
+    // RDWR: can ca read va write
+    if(!check_perm(ip, 4) || !check_perm(ip, 2)){
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  } else if(omode & O_WRONLY){
+    // Chi write: chi can check write
+    if(!check_perm(ip, 2)){
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  } else {
+    // Mac dinh la O_RDONLY (= 0): chi can check read
+    if(!check_perm(ip, 4)){
       iunlockput(ip);
       end_op();
       return -1;
     }
   }
-  if((omode & O_WRONLY) || (omode & O_RDWR)){
-    if(!check_perm(ip, 2)){   // check write permission (2)
-      iunlockput(ip);
-      end_op();
-      return -1;
-    }
-  }
-
   // =================================
   if(ip->type == T_DEVICE && (ip->major < 0 || ip->major >= NDEV)){
     iunlockput(ip);

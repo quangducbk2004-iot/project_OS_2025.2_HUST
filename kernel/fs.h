@@ -39,6 +39,7 @@ struct dinode {
   uint mode;            // Permission bits: rwxrwxrwx (9 low bits)
   uint uid;             // Owner user ID
   uint gid;             // Owner group ID
+  uint pad[13];
 };
 
 // Inodes per block.

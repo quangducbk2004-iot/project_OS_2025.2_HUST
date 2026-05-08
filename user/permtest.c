@@ -10,7 +10,7 @@
 static int pass_count = 0;
 static int fail_count = 0;
 
-static void
+void
 check(const char *desc, int cond)
 {
   if(cond){
@@ -22,7 +22,7 @@ check(const char *desc, int cond)
   }
 }
 
-static int
+int
 make_file(const char *path, const char *data)
 {
   int fd = open(path, O_CREATE | O_RDWR);
