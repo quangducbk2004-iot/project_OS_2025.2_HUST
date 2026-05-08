@@ -335,6 +335,23 @@ sys_open(void)
     }
   }
 
+  // === ENFORCE PERMISSION CHECK ===
+  if((omode & O_RDONLY) == O_RDONLY || (omode & O_RDWR)){
+    if(!check_perm(ip, 4)){   // check read permission (4)
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  }
+  if((omode & O_WRONLY) || (omode & O_RDWR)){
+    if(!check_perm(ip, 2)){   // check write permission (2)
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+  }
+
+  // =================================
   if(ip->type == T_DEVICE && (ip->major < 0 || ip->major >= NDEV)){
     iunlockput(ip);
     end_op();
@@ -501,5 +518,37 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
+  return 0;
+}
+uint64
+sys_chmod(void)
+{
+  char path[MAXPATH];
+  int mode;
+  struct inode *ip;
+  struct proc *p = myproc();
+
+  if(argstr(0, path, MAXPATH) < 0)
+    return -1;
+  argint(1, &mode);
+
+  begin_op();
+  if((ip = namei(path)) == 0){
+    end_op();
+    return -1;
+  }
+  ilock(ip);
+
+  // Chi owner hoac root moi duoc chmod
+  if(p->uid != 0 && p->uid != ip->uid){
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
+  ip->mode = (uint)mode & 0777;  // chi giu 9 bits thap
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
   return 0;
 }
