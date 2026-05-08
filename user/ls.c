@@ -9,19 +9,33 @@ fmtname(char *path)
 {
   static char buf[DIRSIZ+1];
   char *p;
-
-  // Find first character after last slash.
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
   p++;
-
-  // Return blank-padded name.
   if(strlen(p) >= DIRSIZ)
     return p;
   memmove(buf, p, strlen(p));
   memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
   buf[sizeof(buf)-1] = '\0';
   return buf;
+}
+
+// In permission string dang "rwxr-xr-x"
+void
+print_perm(uint mode)
+{
+  char p[10];
+  p[0] = (mode & 0400) ? 'r' : '-';
+  p[1] = (mode & 0200) ? 'w' : '-';
+  p[2] = (mode & 0100) ? 'x' : '-';
+  p[3] = (mode & 0040) ? 'r' : '-';
+  p[4] = (mode & 0020) ? 'w' : '-';
+  p[5] = (mode & 0010) ? 'x' : '-';
+  p[6] = (mode & 0004) ? 'r' : '-';
+  p[7] = (mode & 0002) ? 'w' : '-';
+  p[8] = (mode & 0001) ? 'x' : '-';
+  p[9] = '\0';
+  printf("%s", p);
 }
 
 void
@@ -36,7 +50,6 @@ ls(char *path)
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
-
   if(fstat(fd, &st) < 0){
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
@@ -46,7 +59,9 @@ ls(char *path)
   switch(st.type){
   case T_DEVICE:
   case T_FILE:
-    printf("%s %d %d %d\n", fmtname(path), st.type, st.ino, (int) st.size);
+    printf("%s ", fmtname(path));
+    print_perm(st.mode);
+    printf(" uid:%d %d\n", st.uid, (int)st.size);
     break;
 
   case T_DIR:
@@ -66,7 +81,9 @@ ls(char *path)
         printf("ls: cannot stat %s\n", buf);
         continue;
       }
-      printf("%s %d %d %d\n", fmtname(buf), st.type, st.ino, (int) st.size);
+      printf("%s ", fmtname(buf));
+      print_perm(st.mode);
+      printf(" uid:%d %d\n", st.uid, (int)st.size);
     }
     break;
   }
@@ -77,7 +94,6 @@ int
 main(int argc, char *argv[])
 {
   int i;
-
   if(argc < 2){
     ls(".");
     exit(0);
