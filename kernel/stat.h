@@ -8,4 +8,6 @@ struct stat {
   short type;  // Type of file
   short nlink; // Number of links to file
   uint64 size; // Size of file in bytes
+  uint mode;   // Permission bits: rwxrwxrwx (9 low bits)
+  uint uid;    // Owner user ID
 };

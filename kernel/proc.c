@@ -145,6 +145,8 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
+  p->uid = 1;  // default: regular user (0 = root)
+  p->gid = 1;
 
   return p;
 }
