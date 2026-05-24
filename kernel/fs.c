@@ -30,21 +30,25 @@ int
 check_perm(struct inode *ip, int access)
 {
   struct proc *p = myproc();
-  uint mode, bits;
+  uint mode = ip->mode;
+  uint bits;
 
-  if(p == 0) return 1;           // kernel call: always allow
-  if(p->uid == 0) return 1;      // root: always allow
-  if(ip == 0) return 0;
+  if(p == 0)
+    return 1;
 
-  mode = ip->mode;
+  if(p->uid == 0)
+    return 1;
 
-  if(p->uid == ip->uid) {
-    bits = (mode >> 6) & 0x7;   // owner bits [8:6]
-  } else if(p->gid == ip->gid) {
-    bits = (mode >> 3) & 0x7;   // group bits [5:3]
-  } else {
-    bits = mode & 0x7;           // others bits [2:0]
-  }
+  if(ip->uid == 0)
+    return 1;
+
+  if(p->uid == ip->uid)
+    bits = (mode >> 6) & 7;
+  else if(p->gid == ip->gid)
+    bits = (mode >> 3) & 7;
+  else
+    bits = mode & 7;
+
   return (bits & access) ? 1 : 0;
 }
 

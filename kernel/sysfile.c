@@ -336,6 +336,7 @@ sys_open(void)
   }
 
   // === ENFORCE PERMISSION CHECK ===
+if(ip->type != T_DIR){
   if(omode & O_RDWR){
     // RDWR: can ca read va write
     if(!check_perm(ip, 4) || !check_perm(ip, 2)){
@@ -358,6 +359,7 @@ sys_open(void)
       return -1;
     }
   }
+}
   // =================================
   if(ip->type == T_DEVICE && (ip->major < 0 || ip->major >= NDEV)){
     iunlockput(ip);
