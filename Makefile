@@ -147,6 +147,10 @@ UPROGS=\
 	$U/_dorphan\
         $U/_chmod\
 	$U/_permtest\
+	$U/_chown\
+	$U/_chgrp\
+	$U/_umask\
+	$U/_umasktest\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

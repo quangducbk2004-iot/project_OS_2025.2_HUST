@@ -561,3 +561,86 @@ sys_chmod(void)
   end_op();
   return 0;
 }
+uint64
+sys_chown(void)
+{
+  char path[MAXPATH];
+  int uid, gid;
+  struct inode *ip;
+  struct proc *p = myproc();
+
+  if(argstr(0, path, MAXPATH) < 0)
+    return -1;
+  argint(1, &uid);
+  argint(2, &gid);
+
+  begin_op();
+  if((ip = namei(path)) == 0){
+    end_op();
+    return -1;
+  }
+  ilock(ip);
+
+  // Chỉ root mới được chown
+  if(p->uid != 0){
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
+  ip->uid = (uint)uid;
+  if(gid >= 0)   // -1 = không đổi gid
+    ip->gid = (uint)gid;
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
+  return 0;
+}
+uint64
+sys_chgrp(void)
+{
+  char path[MAXPATH];
+  int gid;
+  struct inode *ip;
+  struct proc *p = myproc();
+
+  if(argstr(0, path, MAXPATH) < 0)
+    return -1;
+  argint(1, &gid);
+
+  begin_op();
+  if((ip = namei(path)) == 0){
+    end_op();
+    return -1;
+  }
+
+  ilock(ip);
+
+  if(p->uid != 0 && p->uid != ip->uid){
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
+  ip->gid = (uint)gid;
+
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
+
+  return 0;
+}
+uint64
+sys_umask(void)
+{
+  int mask;
+  uint old;
+  struct proc *p = myproc();
+
+  argint(0, &mask);
+
+  old = p->umask;
+  p->umask = (uint)mask & 0777;
+
+  return old;
+}

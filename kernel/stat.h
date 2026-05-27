@@ -10,4 +10,5 @@ struct stat {
   uint64 size; // Size of file in bytes
   uint mode;   // Permission bits: rwxrwxrwx (9 low bits)
   uint uid;    // Owner user ID
+  uint gid;
 };

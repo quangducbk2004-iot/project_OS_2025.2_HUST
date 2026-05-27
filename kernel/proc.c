@@ -147,7 +147,7 @@ found:
   p->context.sp = p->kstack + PGSIZE;
   p->uid = 1;  // default: regular user (0 = root)
   p->gid = 1;
-
+  p->umask = 022;
   return p;
 }
 

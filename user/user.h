@@ -25,6 +25,9 @@ char* sys_sbrk(int,int);
 int pause(int);
 int uptime(void);
 int chmod(const char*, int);
+int chown(const char*, int, int);
+int chgrp(const char*, int);
+int umask(int);
 
 // ulib.c
 int stat(const char*, struct stat*);
