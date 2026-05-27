@@ -240,12 +240,18 @@ ialloc(uint dev, short type)
       memset(dip, 0, sizeof(*dip));
       dip->type = type;
       // Set default permissions khi tao file/dir moi
-      if(type == T_DIR)
-        dip->mode = 0755;   // rwxr-xr-x
-      else
-        dip->mode = 0644;   // rw-r--r--
-      dip->uid = myproc() ? myproc()->uid : 0;
-      dip->gid = myproc() ? myproc()->gid : 0;
+      struct proc *pr = myproc();
+uint umask_val = pr ? pr->umask : 022;
+
+if(type == T_DIR){
+  dip->mode = 0755 & ~umask_val;
+} else {
+  dip->mode = 0666 & ~umask_val;
+}
+
+dip->uid = pr ? pr->uid : 0;
+dip->gid = pr ? pr->gid : 0;
+
       log_write(bp);   // mark it allocated on the disk
       brelse(bp);
       return iget(dev, inum);
@@ -530,6 +536,7 @@ stati(struct inode *ip, struct stat *st)
   st->size = ip->size;
   st->mode = ip->mode;
   st->uid  = ip->uid;
+  st->gid = ip->gid;
 }
 
 // Read data from inode.

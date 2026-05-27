@@ -61,7 +61,7 @@ ls(char *path)
   case T_FILE:
     printf("%s ", fmtname(path));
     print_perm(st.mode);
-    printf(" uid:%d %d\n", st.uid, (int)st.size);
+    printf(" uid:%d gid:%d %d\n", st.uid, st.gid, (int)st.size);
     break;
 
   case T_DIR:
@@ -83,7 +83,7 @@ ls(char *path)
       }
       printf("%s ", fmtname(buf));
       print_perm(st.mode);
-      printf(" uid:%d %d\n", st.uid, (int)st.size);
+      printf(" uid:%d gid:%d %d\n", st.uid, st.gid, (int)st.size);
     }
     break;
   }

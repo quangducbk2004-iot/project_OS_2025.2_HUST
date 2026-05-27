@@ -106,4 +106,5 @@ struct proc {
   char name[16];               // Process name (debugging)
   uint uid;                    // User ID (0 = root)
   uint gid;                    // Group ID
+  uint umask;
 };

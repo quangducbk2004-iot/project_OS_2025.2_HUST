@@ -102,6 +102,9 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_chmod(void);
+extern uint64 sys_chown(void);
+extern uint64 sys_chgrp(void);
+extern uint64 sys_umask(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -128,6 +131,9 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_chmod]   sys_chmod,
+[SYS_chown]   sys_chown,
+[SYS_chgrp]   sys_chgrp,
+[SYS_umask]   sys_umask,
 };
 
 void

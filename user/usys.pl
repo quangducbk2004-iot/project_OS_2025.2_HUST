@@ -43,3 +43,6 @@ entry("sbrk");
 entry("pause");
 entry("uptime");
 entry("chmod");
+entry("chown");
+entry("chgrp");
+entry("umask");
