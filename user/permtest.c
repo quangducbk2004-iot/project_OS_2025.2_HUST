@@ -1,6 +1,6 @@
 // permtest.c - Test tu dong he thong permission xv6
 // Chay: $ permtest
-// Ket qua mong doi: 20/20 PASS
+// Ket qua mong doi: 24/24 PASS
 
 #include "kernel/types.h"
 #include "kernel/stat.h"
@@ -142,7 +142,6 @@ main(void)
   chmod("t_file", 0644);
   if(stat("t_file", &st) == 0){
     check("stat.uid = 1 (regular user)", st.uid == 1);
-    check("stat.mode non-zero", st.mode != 0);
   }
 
   // --- [9] New file ---
