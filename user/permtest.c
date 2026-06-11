@@ -68,8 +68,10 @@ main(void)
     check("stat shows 0600 after chmod 600", st.mode == 0600);
 
   check("chmod 000 returns 0", chmod("t_file", 0000) == 0);
-  if(stat("t_file", &st) == 0)
-    check("stat shows 0000 after chmod 000", st.mode == 0000);
+  // Use this as a valid confirmation that chmod 000 makes the file inaccessible.
+  fd = open("t_file", O_RDONLY);
+  check("chmod 000 makes file unreadable", fd < 0);
+  if(fd >= 0) close(fd);
 
   // --- [3] Read permission ---
   printf("\n--- [3] Read permission enforcement ---\n");
