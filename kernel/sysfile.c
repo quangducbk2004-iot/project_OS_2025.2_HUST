@@ -582,11 +582,12 @@ sys_chown(void)
   ilock(ip);
 
   // Chỉ root mới được chown
-  if(p->uid != 0){
-    iunlockput(ip);
-    end_op();
-    return -1;
-  }
+// root or current file owner can change owner/group.
+if(p->uid != 0 && p->uid != ip->uid){
+  iunlockput(ip);
+  end_op();
+  return -1;
+}
 
   ip->uid = (uint)uid;
   if(gid >= 0)   // -1 = không đổi gid
